@@ -8,37 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Main {
-    private static final String struct = "\tOwners                         []string             `json:\"owners\" cql:\"owners\"`\n" +
-            "\tFileID                         gocql.UUID           `json:\"fileID\" cql:\"file_id\"`\n" +
-            "\tSearchID                       gocql.UUID           `json:\"searchID\" cql:\"searchid\"`\n" +
-            "\tMD5Hash                        string               `json:\"md5Hash\" cql:\"md5hash\"`\n" +
-            "\tFileName                       string               `json:\"fileName\" cql:\"file_name\"`\n" +
-            "\tFileType                       string               `json:\"fileType\" cql:\"file_type\"`\n" +
-            "\tFileSize                       int64                `json:\"fileSize\" cql:\"file_size\"`\n" +
-            "\tGist                           string               `json:\"gist\" cql:\"gist\"`\n" +
-            "\tThumbnailURL                   string               `json:\"thumbnailurl\" cql:\"thumbnail_url\"`\n" +
-            "\tThumbnail                      []byte               `json:\"thumbnail\" cql:\"thumbnail\"`\n" +
-            "\tCreated                        time.Time            `json:\"created\" cql:\"created\"`\n" +
-            "\tLastModified                   time.Time            `json:\"lastModified\" cql:\"last_modified\"`\n" +
-            "\tLastOpened                     time.Time            `json:\"lastOpened\" cql:\"last_opened\"`\n" +
-            "\tLatitude                       float64              `json:\"latitude\" cql:\"latitude\"`\n" +
-            "\tLongitude                      float64              `json:\"longitude\" cql:\"longitude\"`\n" +
-            "\tShape                          string               `json:\"shape\" cql:\"shape\"`\n" +
-            "\tAuthor                         string               `json:\"author\" cql:\"author\"`\n" +
-            "\tFileText                       string               `json:\"fileText\" cql:\"file_text\"`\n" +
-            "\tDataString                     map[string]string    `json:\"dataString,omitempty\"`\n" +
-            "\tDataText                       map[string]string    `json:\"dataText,omitempty\"`\n" +
-            "\tDataDouble                     map[string]float64   `json:\"dataDouble,omitempty\"`\n" +
-            "\tDataInt                        map[string]int64     `json:\"dataInt,omitempty\"`\n" +
-            "\tDataBool                       map[string]bool      `json:\"dataBool,omitempty\"`\n" +
-            "\tDataTime                       map[string]time.Time `json:\"dataTime,omitempty\"`\n" +
-            "\tVersion                        gocql.UUID           `json:\"version,omitempty\" cql:\"version\"`\n" +
-            "\tAction                         []string             `json:\"action,omitempty\" cql:\"action\"`\n" +
-            "\tPermissions                    int                  `json:\"permissions\" cql:\"permissions\"`\n" +
-            "\tStarred                        bool                 `json:\"starred\"`\n" +
-            "\tRestorePath                    string               `json:\"restorePath,omitempty\" cql:\"restore_path\"`\n" +
-            "\taide.Groups                    `json:\"groups\" cql:\"groups\"`\n" +
-            "\tclassifications.Classification `json:\"classification\" cql:\"classification\"`";
+    private static final String struct = "";
 
     public static void main(final String[] args) {
         final String[] lines = struct
@@ -61,6 +31,7 @@ public class Main {
         put("gocql.UUID", "String");
         put("string", "String");
         put("int64", "Long");
+        put("int32", "Integer");
         put("int", "Integer");
         put("byte", "Byte");
         put("time.Time", "DateString");
@@ -68,19 +39,30 @@ public class Main {
         put("bool", "Boolean");
         put("classifications.Classification", "Classification");
         put("aide.Groups", "List<String>");
+        put("AVR", "Avr");
     }};
 
     private static final Pattern mapMatch = Pattern.compile("\\[(.+)](.+)");
 
-    private static String getConvertedType(final String type) {
+    private static String getConvertedType(String type) {
+        if (type.startsWith("*")) {
+            type = type.substring(1);
+        }
+
         if (type.startsWith("[]")) {
-            return "List<" + typeConversion.get(type.substring(2)) + ">";
+            return "List<" + getType(type.substring(2)) + ">";
         } else if (type.startsWith("map[")) {
             final String[] types = getMatches(mapMatch, type);
-            return "Map<" + typeConversion.get(types[0]) + ", " + typeConversion.get(types[1]) + ">";
+            return "Map<" + getType(types[0]) + ", " + getType(types[1]) + ">";
         } else {
-            return typeConversion.get(type);
+            return getType(type);
         }
+    }
+
+    private static String getType(final String type) {
+        final String actualType = typeConversion.get(type);
+
+        return actualType == null ? type : actualType;
     }
 
     private static final Pattern fieldMatch = Pattern.compile("`json:\"(.+?)[,\"]");
