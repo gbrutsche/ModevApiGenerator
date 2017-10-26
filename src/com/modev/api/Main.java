@@ -20,9 +20,9 @@ public class Main {
             final String[] parts = line.trim().split("\\s+");
 
             if (parts.length >= 3) {
-                System.out.println("@ApiField\nprivate " + getConvertedType(parts[1]) + " " + getFieldName(parts[2]) + ";\n");
+                System.out.println("private " + getConvertedType(parts[1]) + " " + getFieldName(parts[2]) + ";\n");
             } else if (parts.length == 2) {
-                System.out.println("@ApiField\nprivate " + getConvertedType(parts[0]) + " " + getFieldName(parts[1]) + ";\n");
+                System.out.println("private " + getConvertedType(parts[0]) + " " + getFieldName(parts[1]) + ";\n");
             }
         }
     }
